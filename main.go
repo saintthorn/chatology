@@ -1,16 +1,30 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 )
 
 func main() {
-	http.HandleFunc("/hello", hello)
+	http.HandleFunc("/", getRoot)
+	http.HandleFunc("/hello", getHello)
 
-	http.ListenAndServe(":8000", nil)
+	err := http.ListenAndServe(":3333", nil)
+	if errors.Is(err, http.ErrServerClosed) {
+		fmt.Printf("server closed\n")
+	} else if err != nil {
+		fmt.Printf("error starting server: %s\n", err)
+	}
 }
 
-func hello(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, "hello\n")
+func getRoot(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("got / request\n")
+	io.WriteString(w, "This is my website!\n")
+}
+
+func getHello(w http.ResponseWriter, req *http.Request) {
+	fmt.Printf("got /hello request\n")
+	io.WriteString(w, "Hello, HTTP!\n")
 }
